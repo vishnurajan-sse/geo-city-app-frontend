@@ -1,13 +1,38 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import LandingPage from './LandingPage'
 import { vi } from 'vitest';
-import type { City, LoaderProps } from '../../interfaces/common';
+import type { ButtonProps, CardProps, City, LoaderProps, TableProps } from '../../interfaces/common';
 import * as ApiService from '../../services/ApiService';
 import * as GeoLocationService from '../../services/GeoLocationService';
 
 
 vi.mock('../../components/Loader/Loader', () => ({
   default: ({ message }: LoaderProps) => <div data-testid="loader">{message}</div>
+}));
+
+vi.mock('../../components/Table/Table', () => ({
+  default: ({ data, onRowClick }: TableProps<City>) => (
+    <div data-testid="table-mock">
+      {data && data.map((row: City, index: number) => (
+        <div key={index} onClick={() => onRowClick?.(row)}>{row.name}</div>
+      ))}
+    </div>
+  )
+}));
+
+vi.mock('../../components/Button/Button', () => ({
+  default: ({ onClick, children }: ButtonProps) => (
+    <button onClick={onClick}>{children}</button>
+  )
+}));
+
+vi.mock('../../components/Card/Card', () => ({
+  default: ({ title, description }: CardProps) => (
+    <div data-testid="card-mock">
+      <h2>{title}</h2>
+      <p>{description}</p>
+    </div>
+  )
 }));
 
 describe('LandingPage', () => {
@@ -57,6 +82,19 @@ describe('LandingPage', () => {
     const button = screen.getByRole('button');
     fireEvent.click(button);
     expect(ApiService.fetchData).toHaveBeenCalledTimes(2);
+  });
+
+  it('displays card on row click with correct details', async () => {
+    render(<LandingPage />);
+    await waitFor(() => screen.getByText('City1'));
+
+    fireEvent.click(screen.getByText('City1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('card-mock')).toBeInTheDocument();
+      expect(screen.getAllByText('City1').length).toBeGreaterThan(0);
+      expect(screen.getByText(/GeoNameID 123456/)).toBeInTheDocument();
+    });
   });
 
 

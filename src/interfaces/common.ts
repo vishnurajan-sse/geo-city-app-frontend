@@ -11,12 +11,12 @@ export interface City {
 
 export interface Column<T> {
     header: string;
-    responseKey: keyof T; // in this City case:  responsekey should be 'name | lat | lng | country | admin1 | admin2' (we can write these if its not a reusable components, because here responseKey can be anything, we are mentioning it as keyOf T)
+    responseKey: keyof T; 
 }
 
-export interface TableProps<T> { // here T means City. can be any object for a reusable table.
+export interface TableProps<T> { 
     columns: Column<T>[];
-    data: T[]; // data is also reusable can be anything, so we are passing it as generic type 
+    data: T[]; 
     onRowClick?: (row: T) => void;
 }
 
